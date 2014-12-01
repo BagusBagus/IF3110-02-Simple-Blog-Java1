@@ -7,8 +7,8 @@
 <!-- the Compile on Save feature is turned off for the project. -->
 <!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
 <!-- in the project's Project Properties dialog box.-->
-<project name="WBD_Project" default="default" basedir=".">
-    <description>Builds, tests, and runs the project WBD Project.</description>
+<project name="tubes" default="default" basedir=".">
+    <description>Builds, tests, and runs the project tubes.</description>
     <import file="nbproject/build-impl.xml"/>
     <!--
 

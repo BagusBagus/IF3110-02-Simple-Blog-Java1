@@ -15,6 +15,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 
 @ManagedBean(name = "loginHandler",eager=true)
+@SessionScoped
 public class LoginHandler {
     private String username;
     private String password;
@@ -34,6 +36,11 @@ public class LoginHandler {
     private String test;
     
   
+    
+    public int getRole(){
+        return role;
+    }
+    
     public boolean getLoginAttempted(){
         return loginAttempted&&!loginSucc;
     }
@@ -66,14 +73,13 @@ public class LoginHandler {
     
     public void login() throws IOException, SQLException, ClassNotFoundException{
         execute();
-        if(!getLoginAttempted()){
-            
+        if(!getLoginAttempted()){ 
            FacesContext facesContext = FacesContext.getCurrentInstance();
            Cookie userName = new Cookie(cookiename, username);
            userName.setMaxAge(expiry);
            HttpServletResponse response = (HttpServletResponse) facesContext.getExternalContext().getResponse();
            response.addCookie(userName);
-           response.sendRedirect("lanjut.xhtml");
+           response.sendRedirect("index.jsp");
         }
         
     }
@@ -93,19 +99,22 @@ public class LoginHandler {
         while(rs.next()&&!loginB){
             if(rs.getString("password").equals(password)){
                 loginB=true;
+                if(rs.getString("role").equals("owner")){
+                    role=1;
+                }
+                else if(rs.getString("role").equals("editor")){
+                    role=2;
+                }
+                else if(rs.getString("role").equals("admin")){
+                    role=3;
+                }
             }
-            if(rs.getString("role").equals("owner")){
-                role=1;
-            }
-            else if(rs.getString("role").equals("editor")){
-                role=2;
-            }
-            else if(rs.getString("role").equals("admin")){
-                role=3;
-            }
+            
+            
         }
         loginSucc=loginB;
         loginAttempted = true;
+        con.close();
     }
     
     public void logout() throws IOException{
@@ -115,7 +124,8 @@ public class LoginHandler {
         cookie.setMaxAge(0);
         HttpServletResponse response = (HttpServletResponse) facesContext.getExternalContext().getResponse();
         response.addCookie(cookie);
-        response.sendRedirect("index.xhtml");
+        response.sendRedirect("faces/index.jsp");
+        role=0;
     }
     
     
@@ -147,5 +157,21 @@ public class LoginHandler {
         else{
             return cookie.getValue()!=null;
         }
+    }
+    
+    public boolean isGuest(){
+        return role==0;
+    }
+    
+    public boolean isOwner(){
+        return role==1;
+    }
+    
+    public boolean isEditor(){
+        return role==2;
+    }
+    
+    public boolean isAdmin(){
+        return role==3;
     }
 }
